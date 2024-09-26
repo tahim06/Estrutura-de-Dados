@@ -34,11 +34,35 @@ void inserir_no_fim(No **lista, int num){
             aux = *lista;
             while(aux->prox){
                 aux = aux->prox;
-                aux->prox = novo;
             }
+            aux->prox = novo;
         }
     }else{
         printf("Erro ao alocar memoria!\n");
     }
 }
 
+void inserir_meio(No **lista, int num, int ant){
+    No *novo = (No*)malloc(sizeof(No));
+    No *aux;
+
+    if(novo){
+        novo->valor = num;
+    //checa se é o primeiro nó
+        if(*lista == NULL){
+            novo->prox = NULL;
+            *lista = novo;
+
+        }else{
+            aux = *lista;
+            while(aux->valor != ant && aux->prox) {
+                aux = aux->prox;
+            }
+            novo->prox = aux->prox;
+            aux->prox = novo;
+
+        }
+    }else{
+        printf("Erro ao alocar memoria!\n");
+    }
+}
