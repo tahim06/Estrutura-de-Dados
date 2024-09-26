@@ -20,4 +20,25 @@ void inserir_inicio(No **lista, int num){
 
 }
 
+void inserir_no_fim(No **lista, int num){
+    No *novo = (No*)malloc(sizeof(No));
+    No *aux;
+
+    if(novo){
+        novo->valor = num;
+        novo->prox = NULL;
+
+        if(*lista == NULL){
+            *lista = novo;
+        }else{
+            aux = *lista;
+            while(aux->prox){
+                aux = aux->prox;
+                aux->prox = novo;
+            }
+        }
+    }else{
+        printf("Erro ao alocar memoria!\n");
+    }
+}
 
