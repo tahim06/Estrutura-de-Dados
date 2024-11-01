@@ -2,178 +2,144 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct Node{
-	char nome[30];
-	int valor;
-	struct Node * prox;
-	struct Node * ant;
+struct musica {
+    char titulo_musica[60];
+    char artista[60];
+    int valor;
+    struct musica *prox;
+    struct musica *ant;
 };
 
-typedef struct Node node;
+typedef struct musica Musica;
 
-struct lista{
-	node * inicio;
-	node * fim;
-	int tamanho;
+struct lista {
+    Musica *inicio;
+    Musica *fim;
+    int tamanho;
 };
 
 typedef struct lista LISTA;
 
-LISTA * lista_inicia();
-void lista_insere(LISTA * lista, const char * nome, int valor);
-void lista_imprime(LISTA * l);
-void brincadeira(LISTA * l);
-void contar(LISTA * lista, int qnt);
-void lista_remover(LISTA * l, const char * nome);
-node * atPos(LISTA * l, int index);
-void lista_libera(LISTA * l);
+LISTA *lista_inicia();
+void lista_insere(LISTA *lista, const char *titulo, const char *artista, int valor);
+void lista_imprime(LISTA *l);
+void contar(LISTA *lista, int qnt);
+void lista_remover(LISTA *l, const char *titulo);
+void lista_libera(LISTA *l);
 
+int main() {
+    int n, valor;    
+    char titulo[60], artista[60];    
 
-int main(){
-	int n;
-	int i;
-	char nome[30];
-	int valor;	
+    LISTA *lista = lista_inicia();
+    scanf("%d", &n);
 
-	LISTA * lista = lista_inicia();
+    for (int i = 0; i < n; i++) {
+        scanf(" %59s %59s %d", titulo, artista, &valor);
+        lista_insere(lista, titulo, artista, valor);
+    }
+    
+    contar(lista, lista->inicio->valor);
+    lista_libera(lista);
 
-	scanf("%d", &n);
-
-	for(i=1;i<=n;i++){
-		scanf(" %s %d", nome, &valor);
-		lista_insere(lista, nome, valor);
-	}
-	contar(lista, lista->inicio->valor);
-	lista_libera(lista);
-
-	return 0;
+    return 0;
 }
 
-LISTA * lista_inicia(){
-	LISTA * new = (LISTA *)malloc(sizeof(LISTA));
-	new->inicio = NULL;
-	new->fim = NULL;
-	new->tamanho = 0;
-	return new;
+LISTA *lista_inicia() {
+    LISTA *new_list = (LISTA *)malloc(sizeof(LISTA));
+    new_list->inicio = NULL;
+    new_list->fim = NULL;
+    new_list->tamanho = 0;
+    return new_list;
 }
 
-void lista_insere(LISTA * l, const char * nome, int valor){
-	node * new = (node*)malloc(sizeof(node));
-	new->valor = valor;
-	memcpy(new->nome, nome, strlen(nome));
-	if(l->tamanho == 0){
-		l->inicio = new;
-		l->fim = new;
-		l->tamanho++;
-	}
-	else if(l->tamanho == 1){
-		l->inicio->prox = new;
-		l->inicio->ant = new;
-		l->fim = new;
-		new->ant = l->inicio;
-		new->prox = l->inicio;
-		l->tamanho++;
-	}else{
-		l->inicio->ant = new;
-		new->prox = l->inicio;
-		new->ant = l->fim;
-		l->fim->prox = new;
-		l->fim = new;
-		l->tamanho++;
-	}
+void lista_insere(LISTA *l, const char *titulo, const char *artista, int valor) {
+    Musica *new_musica = (Musica *)malloc(sizeof(Musica));
+    strncpy(new_musica->titulo_musica, titulo, sizeof(new_musica->titulo_musica) - 1);
+    strncpy(new_musica->artista, artista, sizeof(new_musica->artista) - 1);
+    new_musica->valor = valor;
+
+    if (l->tamanho == 0) {
+        new_musica->prox = new_musica;
+        new_musica->ant = new_musica;
+        l->inicio = new_musica;
+        l->fim = new_musica;
+    } else {
+        new_musica->prox = l->inicio;
+        new_musica->ant = l->fim;
+        l->fim->prox = new_musica;
+        l->inicio->ant = new_musica;
+        l->fim = new_musica;
+    }
+    l->tamanho++;
 }
 
-void lista_imprime(LISTA * l){
-	node * percorre = l->inicio;
-	printf("%s %d\n", percorre->nome, percorre->valor);
-	percorre = percorre->prox;
-	while(percorre!=l->inicio){
-		printf("%s %d\n", percorre->nome, percorre->valor);
-		percorre = percorre->prox;
-	}
-	//printf("\nInicio: %s\nFim: %s\n\n", l->inicio->nome, l->fim->nome);
+void lista_imprime(LISTA *l) {
+    if (l->tamanho == 0) return;
+
+    Musica *percorre = l->inicio;
+    do {
+        printf("%s %s %d\n", percorre->titulo_musica, percorre->artista, percorre->valor);
+        percorre = percorre->prox;
+    } while (percorre != l->inicio);
 }
 
-void contar(LISTA * lista, int qnt){
-	int temp;
-	int i;
-	node * percorre = lista->inicio;
-	if(lista->tamanho == 1){
-		printf("Vencedor(a) : %s\n", lista->inicio->nome);
-		return;
-	}
-	if(qnt % 2 == 0){
-		for(i=1;i<=qnt;i++){
-			percorre = percorre->ant; //HORARIO
-			//printf("Ciclo nº: %d\n%s %d\n",i, percorre->nome, percorre->valor);
-		}
-		int numero = percorre->valor;
-		//printf("Parou no: %s\n", percorre->nome);
-		lista_remover(lista, percorre->nome);
-		//printf("Lista Atual: \n");
-		//lista_imprime(lista);
-		contar(lista,numero);
-	}else if(qnt % 2 != 0){
-		for(i=1;i<=qnt;i++){
-			percorre = percorre->prox;	//ANTI-HORARIO
-			//printf("Ciclo nº: %d\n%s %d\n",i, percorre->nome, percorre->valor);
-		}
-		int numero = percorre->valor;
-		//printf("Parou no: %s %d\n", percorre->nome, numero);
-		lista_remover(lista, percorre->nome);
-		//printf("\nLista Atual: \n");
-		//lista_imprime(lista);
-		contar(lista, numero);
-	}	
+void contar(LISTA *lista, int qnt) {
+    Musica *percorre = lista->inicio;
+
+    while (lista->tamanho > 1) {
+        for (int i = 0; i < qnt; i++) {
+            percorre = (qnt % 2 == 0) ? percorre->ant : percorre->prox;
+        }
+        printf("Removendo: %s\n", percorre->titulo_musica);
+        lista_remover(lista, percorre->titulo_musica);
+        percorre = (qnt % 2 == 0) ? percorre->prox : percorre->ant; // Move to next
+        qnt = percorre->valor;
+    }
+    printf("Vencedor(a): %s\n", lista->inicio->titulo_musica);
 }
 
-void lista_remover(LISTA * l, const char * nome){
-	node * percorre =l->inicio, * aux;
-	while(percorre->prox != l->inicio){
-		if(strcmp(percorre->nome, nome)==0){
-			//printf("caiu aqui\n");
-			if(percorre == l->inicio){
-				l->inicio = percorre->prox;
-				l->fim->prox = l->inicio;
-				l->inicio->ant = l->fim;
-				l->tamanho--;
-				free(percorre);
-				return;
-			}else {
-				percorre->ant->prox = percorre->prox;
-				percorre->prox->ant = percorre->ant;
-				l->tamanho--;
-				free(percorre);
-				return;
-			}
-		}
-		percorre=percorre->prox;
-	}
-	if((strcmp(percorre->nome, nome)==0)&&(percorre == l->fim)){
-		l->inicio->ant = l->fim->ant;
-		l->fim = l->inicio->ant;
-		l->fim->prox = l->inicio;
-		l->tamanho--;
-		free(percorre);
-		return;
-	}
+void lista_remover(LISTA *l, const char *titulo) {
+    Musica *percorre = l->inicio;
+
+    do {
+        if (strcmp(percorre->titulo_musica, titulo) == 0) {
+            if (l->tamanho == 1) {
+                free(percorre);
+                l->inicio = l->fim = NULL;
+            } else {
+                if (percorre == l->inicio) {
+                    l->inicio = percorre->prox;
+                }
+                if (percorre == l->fim) {
+                    l->fim = percorre->ant;
+                }
+                percorre->ant->prox = percorre->prox;
+                percorre->prox->ant = percorre->ant;
+                free(percorre);
+            }
+            l->tamanho--;
+            return;
+        }
+        percorre = percorre->prox;
+    } while (percorre != l->inicio);
 }
 
-node * atPos(LISTA * l, int index){
-	int i;
-	node * percorre = l->inicio;
-	for(i=1;i<index;i++) percorre=percorre->prox;
-	return percorre;
-}
+void lista_libera(LISTA *l) {
+    if (!l) return;
 
-void lista_libera(LISTA * l){
-	node * percorre = l->inicio->prox;
-	node * proximo;
-	l->inicio = NULL;
-	while(percorre->prox!=NULL){
-		proximo=percorre->prox;
-		free(percorre);
-		proximo = percorre;
-	}
-	free(l);
+    Musica *percorre = l->inicio;
+    if (!percorre) {
+        free(l);
+        return;
+    }
+
+    Musica *temp;
+    do {
+        temp = percorre;
+        percorre = percorre->prox;
+        free(temp);
+    } while (percorre != l->inicio);
+
+    free(l);
 }
